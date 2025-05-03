@@ -69,9 +69,10 @@ void A_output(struct msg message)
   struct pkt sendpkt;
   int i;
   int index;
-  int seqfirst = baseseqnum_a;
-  int seqlast = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
-
+  int seqfirst;
+  int seqlast;
+  seqfirst = baseseqnum_a;
+  seqlast = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
   /* if not blocked waiting on ACK */
   bool in_window = false;
   if (seqfirst <= seqlast) {
