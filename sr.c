@@ -131,7 +131,7 @@ void A_input(struct pkt packet)
   int in_window;
 
   /* if received ACK is not corrupted */
-  if (!IsCorrupted(packet) == -1) {
+  if (!IsCorrupted(packet)) {
     if (TRACE > 0)
       printf("----A: uncorrupted ACK %d is received\n",packet.acknum);
     total_ACKs_received++;
@@ -213,8 +213,11 @@ void A_timerinterrupt(void)
     printf("----A: time out,resend packets!\n");
     printf("---A: resending packet %d\n", (buffer[0]).seqnum);
   }
-  tolayer3(A, buffer[base % SEQSPACE]);
-  packets_resent++;
+  for (int i = 0; i < windowcount; i++) {
+    int idx = (baseseqnum_a + i) % SEQSPACE;
+    tolayer3(A, buffer[i]);
+    packets_resent++;
+}
   starttimer(A, RTT);
 }
 
@@ -248,7 +251,7 @@ void B_input(struct pkt packet)
   int seqlast;
   int index;
   /* if received packet is not corrupted */
-  if (IsCorrupted(packet)==-1)
+  if (IsCorrupted(packet))
   {
     if (TRACE > 0)
       printf("----B: packet %d is correctly received, send ACK!\n", packet.seqnum);
