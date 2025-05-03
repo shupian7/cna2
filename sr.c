@@ -68,6 +68,7 @@ void A_output(struct msg message)
 {
   struct pkt sendpkt;
   int i;
+  int index;
   int seqfirst = baseseqnum_a;
   int seqlast = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
 
