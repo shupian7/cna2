@@ -126,7 +126,7 @@ void A_output(struct msg message)
 void A_input(struct pkt packet)
 {
   int i, ack_shift = 0;
-  int rel_index, seq_base;
+  int rel_index, seq_base, seq_end;
 
   /* if received ACK is not corrupted */
   if (!IsCorrupted(packet) == -1) {
@@ -136,7 +136,7 @@ void A_input(struct pkt packet)
 
     seq_base = baseseqnum_a;
 
-    int seq_end = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
+    seq_end = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
 
     /* check if new ACK or duplicate */
     int in_window = ((seq_base <= seq_end && packet.acknum >= seq_base && packet.acknum <= seq_end) ||
