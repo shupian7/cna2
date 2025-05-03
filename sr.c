@@ -131,7 +131,7 @@ void A_input(struct pkt packet)
   int in_window;
 
   /* if received ACK is not corrupted */
-  if (!IsCorrupted(packet)) {
+  if (!IsCorrupted(packet) == -1) {
     if (TRACE > 0)
       printf("----A: uncorrupted ACK %d is received\n",packet.acknum);
     total_ACKs_received++;
@@ -248,7 +248,7 @@ void B_input(struct pkt packet)
   int seqlast;
   int index;
   /* if received packet is not corrupted */
-  if (IsCorrupted(packet))
+  if (IsCorrupted(packet)== -1)
   {
     if (TRACE > 0)
       printf("----B: packet %d is correctly received, send ACK!\n", packet.seqnum);
