@@ -214,7 +214,7 @@ void A_timerinterrupt(void)
   }
   tolayer3(A, buffer[index_for(seqnum)]);
   packets_resent++;
-  starttimer(A, RTT);
+  starttimer(A, RTT, seqnum);
 }
 
 
