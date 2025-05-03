@@ -127,6 +127,7 @@ void A_input(struct pkt packet)
 {
   int i, ack_shift = 0;
   int rel_index, seq_base, seq_end;
+  int in_window;
 
   /* if received ACK is not corrupted */
   if (!IsCorrupted(packet) == -1) {
@@ -211,9 +212,9 @@ void A_timerinterrupt(void)
     printf("----A: time out,resend packets!\n");
     printf("---A: resending packet %d\n", (buffer[0]).seqnum);
   }
-  tolayer3(A, buffer[index_for(seqnum)]);
+  tolayer3(A, buffer[0]);
   packets_resent++;
-  starttimer(A, RTT, seqnum);
+  starttimer(A, RTT);
 }
 
 
