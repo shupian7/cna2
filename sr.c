@@ -123,6 +123,7 @@ void A_output(struct msg message)
 /* called from layer 3, when a packet arrives for layer 4
    In this practical this will always be an ACK as B never sends data.
 */
+
 void A_input(struct pkt packet)
 {
   int i, ack_shift = 0;
@@ -140,7 +141,7 @@ void A_input(struct pkt packet)
     seq_end = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
 
     /* check if new ACK or duplicate */
-    int in_window = ((seq_base <= seq_end && packet.acknum >= seq_base && packet.acknum <= seq_end) ||
+    in_window = ((seq_base <= seq_end && packet.acknum >= seq_base && packet.acknum <= seq_end) ||
                      (seq_base > seq_end && (packet.acknum >= seq_base || packet.acknum <= seq_end)));
     if (in_window)
     {
@@ -212,9 +213,9 @@ void A_timerinterrupt(void)
     printf("----A: time out,resend packets!\n");
     printf("---A: resending packet %d\n", (buffer[0]).seqnum);
   }
-  tolayer3(A, buffer[index_for(seqnum)]);
+  tolayer3(A, buffer[base % SEQSPACE]);
   packets_resent++;
-  starttimer(A, RTT, seqnum);
+  starttimer(A, RTT);
 }
 
 
