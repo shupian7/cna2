@@ -213,11 +213,8 @@ void A_timerinterrupt(void)
     printf("----A: time out,resend packets!\n");
     printf("---A: resending packet %d\n", (buffer[0]).seqnum);
   }
-  for (int i = 0; i < windowcount; i++) {
-    int idx = (baseseqnum_a + i) % SEQSPACE;
-    tolayer3(A, buffer[i]);
-    packets_resent++;
-}
+  tolayer3(A, buffer[baseseqnum_a % WINDOWSIZE]);
+  packets_resent++;
   starttimer(A, RTT);
 }
 
