@@ -134,7 +134,7 @@ void A_input(struct pkt packet)
   int rel_index, seq_base;
 
   /* if received ACK is not corrupted */
-  if (IsCorrupted(packet) == -1)
+  if (IsCorrupted(packet) == false)
   {
     if (TRACE > 0)
       printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
