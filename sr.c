@@ -131,7 +131,7 @@ void A_output(struct msg message)
 void A_input(struct pkt packet)
 {
   int i, ack_shift = 0;
-  int rel_index, seq_base，seq_end;
+  int rel_index, seq_base, seq_end;
 
   /* if received ACK is not corrupted */
   if (IsCorrupted(packet) == false)
