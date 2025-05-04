@@ -128,78 +128,80 @@ void A_output(struct msg message)
 */
 void A_input(struct pkt packet)
 {
-  int i, ack_shift = 0;
-  int rel_index, seq_base;
-
+  int ackcount = 0;
+  int i;
+  int seqfirst;
+  int seqlast;
+  int index;
   /* if received ACK is not corrupted */
-  if (IsCorrupted(packet) == -1)
+if (IsCorrupted(packet) == -1)
+{
+  if (TRACE > 0)
+    printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
+  total_ACKs_received++;
+
+  /* need to check if new ACK or duplicate */
+  seqfirst = baseseqnum_a;
+  seqlast = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
+
+  /* check case when seqnum has and hasn't wrapped */
+  if (((seqfirst <= seqlast) && (packet.acknum >= seqfirst && packet.acknum <= seqlast)) ||
+      ((seqfirst > seqlast) && (packet.acknum >= seqfirst || packet.acknum <= seqlast)))
   {
-    if (TRACE > 0)
-      printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
-    total_ACKs_received++;
+    /* check coresponding position in window buffer */
+    if (packet.acknum >= seqfirst)
+      index = packet.acknum - seqfirst;
+    else
+      index = WINDOWSIZE - seqfirst + packet.acknum;
 
-    seq_base = seq_a;
-
-    int seq_end = (seq_a + WINDOWSIZE - 1) % SEQSPACE;
-
-    /* check if ACK is within current window */
-    int in_window = ((seq_base <= seq_end && packet.acknum >= seq_base && packet.acknum <= seq_end) ||
-                     (seq_base > seq_end && (packet.acknum >= seq_base || packet.acknum <= seq_end)));
-
-    if (in_window)
+    if (buffer[index].acknum == NOTINUSE)
     {
-      /* calculate relative index in circular buffer */
-      rel_index = (packet.acknum >= seq_base)
-                      ? packet.acknum - seq_base
-                      : WINDOWSIZE - (seq_base - packet.acknum);
-
-      /* new ACK */
-      if (buffer[rel_index].acknum == NOTINUSE)
-      {
-        if (TRACE > 0)
-          printf("----A: ACK %d is not a duplicate\n", packet.acknum);
-        new_ACKs++;
-        buffer[rel_index].acknum = packet.acknum;
-        windowcount--;
-      }
-      else
-      {
-        if (TRACE > 0)
-          printf("----A: duplicate ACK received, do nothing!\n");
-      }
-
-      /* only slide window if ACK matches the base sequence number */
-      if (packet.acknum == seq_base)
-      {
-        /* count how many consecutive acks from start of buffer */
-        for (i = 0; i < WINDOWSIZE; ++i)
-        {
-          if (buffer[i].acknum != NOTINUSE && strcmp(buffer[i].payload, "") != 0)
-            ack_shift++;
-          else
-            break;
-        }
-
-        /* move base seq number */
-        seq_a = (seq_a + ack_shift) % SEQSPACE;
-
-        /* shift buffer contents */
-        for (i = 0; i < WINDOWSIZE - ack_shift; ++i)
-        {
-          buffer[i] = buffer[i + ack_shift];
-        }
-        for (; i < WINDOWSIZE; ++i)
-        {
-          buffer[i].acknum = NOTINUSE;
-          memset(buffer[i].payload, 0, sizeof(buffer[i].payload));
-        }
-
-        /* restart timer if needed */
-        stoptimer(A);
-        if (windowcount > 0)
-          starttimer(A, RTT);
-      }
+      /* packet is a new ACK */
+      if (TRACE > 0)
+        printf("----A: ACK %d is not a duplicate\n", packet.acknum);
+      new_ACKs++;
+      windowcount--;
+      buffer[index].acknum = packet.acknum;
     }
+    else
+    {
+      if (TRACE > 0)
+        printf("----A: duplicate ACK received, do nothing!\n");
+    }
+    /*compare
+    it is the base one*/
+    if (packet.acknum == seqfirst)
+    {
+      /*check how many concsecutive acks received in buffer*/
+      for (i = 0; i < WINDOWSIZE; i++)
+      {
+        if (buffer[i].acknum != NOTINUSE && strcmp(buffer[i].payload, "") != 0)
+          ackcount++;
+        else
+          break;
+      }
+
+      /*slide window*/
+      baseseqnum_a = (baseseqnum_a + ackcount) % SEQSPACE;
+
+      /*update buffer*/
+      for (i = 0; i < WINDOWSIZE; i++)
+      {
+        if (buffer[i + ackcount].acknum == NOTINUSE || (buffer[i].seqnum + ackcount) % SEQSPACE == A_nextseqnum)
+          buffer[i] = buffer[i + ackcount];
+      }
+
+      /*restart timer*/
+      stoptimer(A);
+      if (windowcount > 0)
+        starttimer(A, RTT);
+    }
+    else
+    {
+      /*update buffer*/
+      buffer[index].acknum = packet.acknum;
+    }
+  }
   }
   else
   {
