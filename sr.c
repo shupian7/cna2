@@ -72,7 +72,7 @@ void A_output(struct msg message)
   int seqlast = (seq_a + WINDOWSIZE-1) % SEQSPACE;
   int index;
 
-  // Check if A_nextseqnum is within the sender window
+  /* Check if A_nextseqnum is within the sender window */
   bool in_window = false;
   if (seqfirst <= seqlast) {
     if (A_nextseqnum >= seqfirst && A_nextseqnum <= seqlast)
@@ -131,7 +131,7 @@ void A_output(struct msg message)
 void A_input(struct pkt packet)
 {
   int i, ack_shift = 0;
-  int rel_index, seq_base;
+  int rel_index, seq_base，seq_end;
 
   /* if received ACK is not corrupted */
   if (IsCorrupted(packet) == false)
@@ -142,7 +142,7 @@ void A_input(struct pkt packet)
 
     seq_base = seq_a;
 
-    int seq_end = (seq_a + WINDOWSIZE - 1) % SEQSPACE;
+    seq_end = (seq_a + WINDOWSIZE - 1) % SEQSPACE;
 
     /* check if ACK is within current window */
     int in_window = ((seq_base <= seq_end && packet.acknum >= seq_base && packet.acknum <= seq_end) ||
