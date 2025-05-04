@@ -26,7 +26,7 @@
 #define RTT  16.0       /* round trip time.  MUST BE SET TO 16.0 when submitting assignment */
 #define WINDOWSIZE 6    /* the maximum number of buffered unacked packet
                           MUST BE SET TO 6 when submitting assignment */
-#define #define SEQSPACE (2*WINDOWSIZE)      /* The serial number space of the SR is at least twice the size of the window, otherwise it is impossible to distinguish between old and new packages. */
+#define SEQSPACE (2*WINDOWSIZE)      /* The serial number space of the SR is at least twice the size of the window, otherwise it is impossible to distinguish between old and new packages. */
 #define NOTINUSE (-1)   /* used to fill header fields that are not being used */
 
 /* generic procedure to compute the checksum of a packet.  Used by both sender and receiver
@@ -71,7 +71,7 @@ void A_output(struct msg message)
   int seqfirst = seq_a;
   int seqlast = (seq_a + WINDOWSIZE-1) % SEQSPACE;
   int index;
-  // Check if A_nextseqnum is within the sender window
+  /* Check if A_nextseqnum is within the sender window */
   bool in_window = false;
   if (seqfirst <= seqlast) {
     if (A_nextseqnum >= seqfirst && A_nextseqnum <= seqlast)
@@ -234,20 +234,16 @@ void A_init(void)
 		     so initially this is set to -1
 		   */
   windowcount = 0;
-  for (int i = 0; i < WINDOWSIZE; ++i)
-  {
-    buffer[i].acknum = NOTINUSE;
-    memset(buffer[i].payload, 0, sizeof(buffer[i].payload));
-  }
+  
 }
 
 
 
 /********* Receiver (B)  variables and procedures ************/
 
-static struct pkt buffer_b[WINDOWSIZE];    /* array for storing packets waiting for packet from A */
-static int baseseqnum_b;        /*record the first seq num of the receiver's window*/
-static int receivelast; /*record the last packet received position*/
+static struct pkt buffer_b[WINDOWSIZE];    
+static int seq_b;        
+static int receivelast; 
 
 
 /* called from layer 3, when a packet arrives for layer 4 at B*/
@@ -277,8 +273,8 @@ void B_input(struct pkt packet)
     /*send ack*/
     tolayer3(B, sendpkt);
     /* need to check if new packet or duplicate */
-    seqfirst = baseseqnum_b;
-    seqlast = (baseseqnum_b + WINDOWSIZE-1) % SEQSPACE;
+    seqfirst = seq_b;
+    seqlast = (seq_b + WINDOWSIZE-1) % SEQSPACE;
 
     /*see if the packet received is inside the window*/
     if (((seqfirst <= seqlast) && (packet.seqnum >= seqfirst && packet.seqnum <= seqlast)) ||
@@ -310,7 +306,7 @@ void B_input(struct pkt packet)
               break;
           }
           /* update state variables */
-          baseseqnum_b = (baseseqnum_b + pckcount) % SEQSPACE;
+          seq_b = (seq_b + pckcount) % SEQSPACE;
           /*update buffer*/
           for (i = 0; i <WINDOWSIZE; i++)
           {
@@ -330,7 +326,7 @@ void B_input(struct pkt packet)
 void B_init(void)
 {
   /* initialise B's window, buffer and sequence number */
-  baseseqnum_b = 0;   /*record the first seq num of the window*/
+  seq_b = 0;   /*record the first seq num of the window*/
   receivelast = -1;
 }
 
