@@ -72,9 +72,18 @@ void A_output(struct msg message)
   int seqlast = (seq_a + WINDOWSIZE-1) % SEQSPACE;
   int index;
 
+  // Check if A_nextseqnum is within the sender window
+  bool in_window = false;
+  if (seqfirst <= seqlast) {
+    if (A_nextseqnum >= seqfirst && A_nextseqnum <= seqlast)
+      in_window = true;
+  } else {
+    if (A_nextseqnum >= seqfirst || A_nextseqnum <= seqlast)
+      in_window = true;
+  }
+
   /* if not blocked waiting on ACK */
-  if (((seqfirst <= seqlast) && (A_nextseqnum >= seqfirst && A_nextseqnum <= seqlast)) ||
-      ((seqfirst > seqlast) && (A_nextseqnum >= seqfirst || A_nextseqnum <= seqlast)))
+  if (in_window)
   {
     if (TRACE > 1)
       printf("----A: New message arrives, send window is not full, send new messge to layer3!\n");
