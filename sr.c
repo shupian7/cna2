@@ -141,8 +141,8 @@ if (IsCorrupted(packet) == -1)
   total_ACKs_received++;
 
   /* need to check if new ACK or duplicate */
-  seqfirst = baseseqnum_a;
-  seqlast = (baseseqnum_a + WINDOWSIZE - 1) % SEQSPACE;
+  seqfirst = seq_a;
+  seqlast = (seq_a + WINDOWSIZE - 1) % SEQSPACE;
 
   /* check case when seqnum has and hasn't wrapped */
   if (((seqfirst <= seqlast) && (packet.acknum >= seqfirst && packet.acknum <= seqlast)) ||
@@ -182,7 +182,7 @@ if (IsCorrupted(packet) == -1)
       }
 
       /*slide window*/
-      baseseqnum_a = (baseseqnum_a + ackcount) % SEQSPACE;
+      seq_a = (seq_a + ackcount) % SEQSPACE;
 
       /*update buffer*/
       for (i = 0; i < WINDOWSIZE; i++)
