@@ -132,6 +132,7 @@ void A_input(struct pkt packet)
 {
   int i, ack_shift = 0;
   int rel_index, seq_base, seq_end;
+  int in_window;
 
   /* if received ACK is not corrupted */
   if (IsCorrupted(packet) == false)
@@ -145,7 +146,7 @@ void A_input(struct pkt packet)
     seq_end = (seq_a + WINDOWSIZE - 1) % SEQSPACE;
 
     /* check if ACK is within current window */
-    int in_window = ((seq_base <= seq_end && packet.acknum >= seq_base && packet.acknum <= seq_end) ||
+    in_window = ((seq_base <= seq_end && packet.acknum >= seq_base && packet.acknum <= seq_end) ||
                      (seq_base > seq_end && (packet.acknum >= seq_base || packet.acknum <= seq_end)));
 
     if (in_window)
